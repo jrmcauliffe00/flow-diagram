@@ -1,6 +1,6 @@
-# Flow Diagram Library
+# Flow diagram generator and MCP
 
-A TypeScript library for creating, manipulating, and visualizing flow diagrams. Includes an MCP server for LLM integration.
+LLMs don't always generate the best flow diagrams. Use this MCP integration to build better visuals.
 
 ## Features
 
