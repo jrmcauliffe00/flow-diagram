@@ -4,13 +4,11 @@ A TypeScript library for creating, manipulating, and visualizing flow diagrams. 
 
 ## Features
 
-- TypeScript-first with full type safety
-- Multiple visualization formats (SVG, HTML, Mermaid, JSON, text)
-- Rich API for creating and modifying diagrams
-- Auto-layout with hierarchical, circular, and grid layouts
-- Customizable styling for nodes and edges
-- Helper functions for common flow patterns
-- Built-in validation and serialization
+- Flow Diagram build functions
+- Server features powered by Express
+- MCP tools integration (including <list the specific MCP tools used, e.g. OpenAI, LangChain, etc.>)
+- Diagram visualization using Mermaid and other supported formats (SVG, HTML, JSON, text)
+- Testing powered by Jest
 
 ## Quick Start
 
