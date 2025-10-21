@@ -1,0 +1,71 @@
+{
+  "title": "My First Flow Diagram",
+  "nodes": [
+    {
+      "id": "node_1",
+      "position": {
+        "x": 400,
+        "y": 50
+      },
+      "type": "start",
+      "style": {
+        "backgroundColor": "#e8f5e8",
+        "borderColor": "#4caf50"
+      },
+      "data": {},
+      "label": "Start"
+    },
+    {
+      "id": "node_2",
+      "position": {
+        "x": 400,
+        "y": 200
+      },
+      "type": "process",
+      "style": {
+        "backgroundColor": "#e3f2fd",
+        "borderColor": "#2196f3"
+      },
+      "data": {},
+      "label": "Process Data"
+    },
+    {
+      "id": "node_3",
+      "position": {
+        "x": 400,
+        "y": 350
+      },
+      "type": "end",
+      "style": {
+        "backgroundColor": "#ffebee",
+        "borderColor": "#f44336"
+      },
+      "data": {},
+      "label": "End"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_1",
+      "style": {},
+      "data": {},
+      "sourceId": "node_1",
+      "targetId": "node_2",
+      "label": "Begin"
+    },
+    {
+      "id": "edge_2",
+      "style": {},
+      "data": {},
+      "sourceId": "node_2",
+      "targetId": "node_3",
+      "label": "Complete"
+    }
+  ],
+  "metadata": {
+    "nodeCount": 3,
+    "edgeCount": 2,
+    "generatedAt": "2025-10-21T12:07:54.294Z",
+    "format": "json"
+  }
+}
