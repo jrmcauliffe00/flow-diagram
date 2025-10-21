@@ -1,17 +1,16 @@
 # Flow Diagram Library
 
-A powerful TypeScript library for creating, manipulating, and visualizing flow diagrams. Perfect for building MCP tools, web applications, and any system that needs to represent processes, workflows, or decision trees as visual diagrams.
+A TypeScript library for creating, manipulating, and visualizing flow diagrams. Includes an MCP server for LLM integration.
 
 ## Features
 
-- 🎯 **TypeScript-first**: Full type safety and excellent developer experience
-- 🎨 **Multiple Visualization Formats**: SVG, HTML, Mermaid, JSON, and text output
-- 🔧 **Rich API**: Create, modify, and manipulate flow diagrams programmatically
-- 📐 **Auto-layout**: Automatic positioning with hierarchical, circular, and grid layouts
-- 🎭 **Customizable Styling**: Full control over node and edge appearance
-- 🧩 **Helper Functions**: Pre-built templates for common flow patterns
-- ✅ **Validation**: Built-in diagram validation and error checking
-- 🔄 **Serialization**: Save and load diagrams as JSON
+- TypeScript-first with full type safety
+- Multiple visualization formats (SVG, HTML, Mermaid, JSON, text)
+- Rich API for creating and modifying diagrams
+- Auto-layout with hierarchical, circular, and grid layouts
+- Customizable styling for nodes and edges
+- Helper functions for common flow patterns
+- Built-in validation and serialization
 
 ## Quick Start
 
@@ -74,7 +73,7 @@ const html = visualizeDiagram(diagram, 'html', { theme: 'dark' });
 ```typescript
 import { FlowDiagramHelpers } from './src/index';
 
-// Linear flow: A -> B -> C -> D
+// Linear flow
 const linearFlow = FlowDiagramHelpers.createLinearFlow([
   'Start', 'Process', 'Validate', 'End'
 ]);
@@ -84,210 +83,57 @@ const decisionTree = FlowDiagramHelpers.createDecisionTree('User Login', [
   { condition: 'Valid?', next: 'Grant Access' },
   { condition: 'Invalid?', next: 'Show Error' }
 ]);
-
-// Process with parallel branches
-const processFlow = FlowDiagramHelpers.createProcessFlow([
-  { name: 'Receive Order' },
-  { name: 'Process Payment' },
-  { 
-    name: 'Prepare Items',
-    parallel: ['Pack Item A', 'Pack Item B', 'Pack Item C']
-  },
-  { name: 'Ship Order' }
-]);
 ```
 
 ## API Reference
 
-### FlowDiagram Class
+### Core Classes
 
-The core class for managing flow diagrams.
+- `FlowDiagram` - Main class for managing nodes and edges
+- `FlowDiagramHelpers` - Utility functions for common patterns
+- `FlowDiagramVisualizer` - Generate visualizations in multiple formats
 
-#### Methods
+### Key Methods
 
-- `addNode(node: Omit<Node, 'id'>): string` - Add a new node
-- `getNode(id: string): Node | undefined` - Get a node by ID
-- `updateNode(id: string, updates: Partial<Node>): boolean` - Update a node
-- `removeNode(id: string): boolean` - Remove a node and its edges
-- `addEdge(edge: Omit<Edge, 'id'>): string` - Add a new edge
-- `getEdge(id: string): Edge | undefined` - Get an edge by ID
-- `updateEdge(id: string, updates: Partial<Edge>): boolean` - Update an edge
-- `removeEdge(id: string): boolean` - Remove an edge
-- `autoLayout(layout: 'hierarchical' | 'circular' | 'grid'): void` - Auto-position nodes
-- `toJSON(): any` - Serialize to JSON
-- `static fromJSON(data: any): FlowDiagram` - Deserialize from JSON
-
-### FlowDiagramHelpers Class
-
-Utility functions for common flow patterns.
-
-#### Methods
-
-- `createLinearFlow(labels: string[]): FlowDiagram` - Create a linear flow
-- `createBranchingFlow(input: string, outputs: string[]): FlowDiagram` - Create branching flow
-- `createConvergingFlow(inputs: string[], output: string): FlowDiagram` - Create converging flow
-- `createDecisionTree(root: string, decisions: Array<{condition: string, next: string}>): FlowDiagram` - Create decision tree
-- `createProcessFlow(steps: Array<{name: string, parallel?: string[]}>): FlowDiagram` - Create process flow
-- `clone(diagram: FlowDiagram): FlowDiagram` - Clone a diagram
-- `merge(diagram1: FlowDiagram, diagram2: FlowDiagram, options?): FlowDiagram` - Merge diagrams
-- `findCycles(diagram: FlowDiagram): string[][]` - Find cycles in the diagram
-- `validate(diagram: FlowDiagram): {isValid: boolean, errors: string[]}` - Validate diagram
-
-### FlowDiagramVisualizer Class
-
-Generate visual representations of flow diagrams.
-
-#### Methods
-
-- `visualize(diagram: FlowDiagram, options: VisualizationOptions): string` - Generate visualization
-- `toText(diagram: FlowDiagram): string` - Generate text representation
-
-#### Supported Formats
-
-- **SVG**: Scalable vector graphics
-- **HTML**: Complete HTML page with embedded SVG
-- **Mermaid**: Mermaid diagram syntax
-- **JSON**: Structured data representation
-- **Text**: Human-readable text format
-
-## Data Types
-
-### Node
-
-```typescript
-interface Node {
-  id: string;
-  label: string;
-  type?: string;
-  position?: Position;
-  style?: NodeStyle;
-  data?: Record<string, any>;
-}
-```
-
-### Edge
-
-```typescript
-interface Edge {
-  id: string;
-  sourceId: string;
-  targetId: string;
-  label?: string;
-  style?: EdgeStyle;
-  data?: Record<string, any>;
-}
-```
-
-### Styling
-
-Both nodes and edges support extensive styling options:
-
-```typescript
-interface NodeStyle {
-  color?: string;
-  backgroundColor?: string;
-  borderColor?: string;
-  borderWidth?: number;
-  borderRadius?: number;
-  fontSize?: number;
-  fontFamily?: string;
-  width?: number;
-  height?: number;
-}
-
-interface EdgeStyle {
-  color?: string;
-  width?: number;
-  style?: 'solid' | 'dashed' | 'dotted';
-  arrowSize?: number;
-  label?: string;
-}
-```
-
-## Examples
-
-Check out the `src/examples.ts` file for comprehensive examples including:
-
-- Basic flow diagrams
-- Decision trees
-- Process flows with parallel branches
-- Complex e-commerce workflows
-- Custom styling and theming
+- `addNode()`, `addEdge()` - Add elements to diagrams
+- `autoLayout()` - Automatic positioning
+- `visualize()` - Generate SVG, HTML, Mermaid, JSON, or text output
+- `createLinearFlow()`, `createDecisionTree()` - Helper functions
 
 ## Development
 
 ```bash
-# Install dependencies
 npm install
-
-# Build the project
 npm run build
-
-# Run tests
 npm test
-
-# Run in development mode
-npm run dev
-
-# Run demo
 npm run demo
 ```
 
-## MCP Integration
+## MCP Server
 
-This library includes a built-in MCP server that exposes flow diagram functionality to LLMs via HTTP API endpoints.
+The library includes an MCP server for LLM integration.
 
-### Starting the MCP Server
+### Start Server
 
 ```bash
-# Development mode (with auto-reload)
 npm run mcp:dev
-
-# Production mode
-npm run build
-npm run mcp:start
 ```
 
-The server will be available at `http://localhost:3000` with these endpoints:
-
+Server runs at `http://localhost:3000` with these endpoints:
 - `GET /health` - Health check
-- `GET /mcp/tools` - List available MCP tools
-- `POST /mcp/tools/:toolName/execute` - Execute a specific tool
+- `GET /mcp/tools` - List available tools
+- `POST /mcp/tools/:toolName/execute` - Execute tools
 
-### Available MCP Tools
+### Available Tools
 
-- `create_diagram` - Create a new flow diagram
-- `add_node` - Add a node to a diagram
-- `add_edge` - Add an edge between nodes
-- `visualize_diagram` - Generate visualizations (SVG, HTML, Mermaid, etc.)
-- `create_linear_flow` - Create a linear flow
-- `create_decision_tree` - Create a decision tree
-- `create_process_flow` - Create a process flow with parallel branches
-- `get_diagram_info` - Get diagram information
-- `list_diagrams` - List all diagrams
+- `create_diagram`, `add_node`, `add_edge` - Basic operations
+- `visualize_diagram` - Generate visualizations
+- `create_linear_flow`, `create_decision_tree`, `create_process_flow` - Helper functions
+- `get_diagram_info`, `list_diagrams` - Information queries
 
-### Example MCP Usage
+### Cursor Integration
 
-```bash
-# List available tools
-curl http://localhost:3000/mcp/tools
-
-# Create a linear flow
-curl -X POST http://localhost:3000/mcp/tools/create_linear_flow/execute \
-  -H "Content-Type: application/json" \
-  -d '{"parameters": {"labels": ["Start", "Process", "End"], "title": "My Flow"}}'
-```
-
-### Testing the MCP Server
-
-```bash
-# Run the client demo
-npx ts-node examples/mcp-client-demo.ts
-```
-
-### Connecting to Cursor
-
-To use the MCP server with Cursor, add this configuration to your Cursor MCP settings:
+Add this to your Cursor MCP config:
 
 **macOS:** `~/Library/Application Support/Cursor/User/globalStorage/cursor.mcp/config.json`
 **Windows:** `%APPDATA%\Cursor\User\globalStorage\cursor.mcp\config.json`
@@ -307,7 +153,7 @@ To use the MCP server with Cursor, add this configuration to your Cursor MCP set
 }
 ```
 
-After updating the configuration, restart Cursor. You can then ask Cursor to create flow diagrams using natural language like "Create a flow diagram for user authentication" or "Make a decision tree for order processing".
+Restart Cursor after updating the configuration.
 
 ## License
 

@@ -448,8 +448,8 @@ app.use('*', (req: any, res: any) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Flow Diagram MCP Server running on port ${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔧 MCP Tools: http://localhost:${PORT}/mcp/tools`);
-  console.log(`📚 Available tools: ${mcpTools.length}`);
+  console.log(`Flow Diagram MCP Server running on port ${PORT}`);
+  console.log(`Health check: http://localhost:${PORT}/health`);
+  console.log(`MCP Tools: http://localhost:${PORT}/mcp/tools`);
+  console.log(`Available tools: ${mcpTools.length}`);
 });

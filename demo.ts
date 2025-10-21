@@ -2,7 +2,7 @@
 
 import { createFlowDiagram, visualizeDiagram, FlowDiagramHelpers } from './src/index';
 
-console.log('🚀 Flow Diagram Demo\n');
+console.log('Flow Diagram Demo\n');
 
 // Create a simple flow diagram
 console.log('Creating a simple flow diagram...');
@@ -34,25 +34,25 @@ diagram.addEdge({ sourceId: processId, targetId: endId, label: 'Complete' });
 // Auto-layout
 diagram.autoLayout('hierarchical');
 
-console.log(`✅ Created diagram with ${diagram.nodeCount} nodes and ${diagram.edgeCount} edges`);
+console.log(`Created diagram with ${diagram.nodeCount} nodes and ${diagram.edgeCount} edges`);
 
 // Generate different visualizations
-console.log('\n📊 Generating visualizations...');
+console.log('\nGenerating visualizations...');
 
 // SVG
 const svg = visualizeDiagram(diagram, 'svg', { theme: 'light' });
-console.log('✅ SVG generated');
+console.log('SVG generated');
 
 // Mermaid
 const mermaid = visualizeDiagram(diagram, 'mermaid');
-console.log('✅ Mermaid diagram generated');
+console.log('Mermaid diagram generated');
 
 // Text representation
 const text = diagram.getAllNodes().map(node => node.label).join(' -> ');
-console.log(`✅ Text representation: ${text}`);
+console.log(`Text representation: ${text}`);
 
 // Create a more complex example using helpers
-console.log('\n🔧 Creating complex example with helpers...');
+console.log('\nCreating complex example with helpers...');
 const complexDiagram = FlowDiagramHelpers.createProcessFlow([
   { name: 'Receive Order' },
   { name: 'Process Payment' },
@@ -63,7 +63,7 @@ const complexDiagram = FlowDiagramHelpers.createProcessFlow([
   { name: 'Ship Order' }
 ]);
 
-console.log(`✅ Complex diagram created with ${complexDiagram.nodeCount} nodes and ${complexDiagram.edgeCount} edges`);
+console.log(`Complex diagram created with ${complexDiagram.nodeCount} nodes and ${complexDiagram.edgeCount} edges`);
 
 // Generate HTML file
 const html = visualizeDiagram(complexDiagram, 'html', { 
@@ -71,11 +71,11 @@ const html = visualizeDiagram(complexDiagram, 'html', {
   showGrid: true 
 });
 
-console.log('\n📁 Saving HTML visualization...');
+console.log('\nSaving HTML visualization...');
 // In a real app, you'd write this to a file
-console.log('✅ HTML visualization ready (would be saved to file)');
+console.log('HTML visualization ready (would be saved to file)');
 
-console.log('\n🎉 Demo complete!');
+console.log('\nDemo complete!');
 console.log('\nNext steps:');
 console.log('1. Run: npm install');
 console.log('2. Run: npm run build');

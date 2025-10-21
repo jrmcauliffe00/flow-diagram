@@ -42,7 +42,7 @@ diagram.addEdge({ sourceId: processId, targetId: endId, label: 'Complete' });
 // Auto-layout
 diagram.autoLayout('hierarchical');
 
-console.log(`✅ Created diagram with ${diagram.nodeCount} nodes and ${diagram.edgeCount} edges`);
+console.log(`Created diagram with ${diagram.nodeCount} nodes and ${diagram.edgeCount} edges`);
 
 // Generate different visualizations
 console.log('\nGenerating visualizations...');
