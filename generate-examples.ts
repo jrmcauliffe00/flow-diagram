@@ -4,7 +4,7 @@ import { createFlowDiagram, visualizeDiagram, FlowDiagramHelpers } from './src/i
 import * as fs from 'fs';
 import * as path from 'path';
 
-console.log('🚀 Generating Flow Diagram Examples\n');
+console.log('Generating Flow Diagram Examples\n');
 
 // Create output directory
 const outputDir = './examples';
@@ -45,35 +45,35 @@ diagram.autoLayout('hierarchical');
 console.log(`✅ Created diagram with ${diagram.nodeCount} nodes and ${diagram.edgeCount} edges`);
 
 // Generate different visualizations
-console.log('\n📊 Generating visualizations...');
+console.log('\nGenerating visualizations...');
 
 // SVG
 const svg = visualizeDiagram(diagram, 'svg', { theme: 'light' });
 fs.writeFileSync(path.join(outputDir, 'simple-diagram.svg'), svg);
-console.log('✅ SVG saved to examples/simple-diagram.svg');
+console.log('SVG saved to examples/simple-diagram.svg');
 
 // Mermaid
 const mermaid = visualizeDiagram(diagram, 'mermaid');
 fs.writeFileSync(path.join(outputDir, 'simple-diagram.mmd'), mermaid);
-console.log('✅ Mermaid saved to examples/simple-diagram.mmd');
+console.log('Mermaid saved to examples/simple-diagram.mmd');
 
 // HTML
 const html = visualizeDiagram(diagram, 'html', { theme: 'light' });
 fs.writeFileSync(path.join(outputDir, 'simple-diagram.html'), html);
-console.log('✅ HTML saved to examples/simple-diagram.html');
+console.log('HTML saved to examples/simple-diagram.html');
 
 // JSON
 const json = visualizeDiagram(diagram, 'json');
 fs.writeFileSync(path.join(outputDir, 'simple-diagram.json'), json);
-console.log('✅ JSON saved to examples/simple-diagram.json');
+console.log('JSON saved to examples/simple-diagram.json');
 
 // Text representation
 const text = diagram.getAllNodes().map(node => node.label).join(' -> ');
 fs.writeFileSync(path.join(outputDir, 'simple-diagram.txt'), text);
-console.log('✅ Text saved to examples/simple-diagram.txt');
+console.log('Text saved to examples/simple-diagram.txt');
 
 // Create a more complex example using helpers
-console.log('\n🔧 Creating complex example with helpers...');
+console.log('\nCreating complex example with helpers...');
 const complexDiagram = FlowDiagramHelpers.createProcessFlow([
   { name: 'Receive Order' },
   { name: 'Process Payment' },
@@ -84,7 +84,7 @@ const complexDiagram = FlowDiagramHelpers.createProcessFlow([
   { name: 'Ship Order' }
 ]);
 
-console.log(`✅ Complex diagram created with ${complexDiagram.nodeCount} nodes and ${complexDiagram.edgeCount} edges`);
+console.log(`Complex diagram created with ${complexDiagram.nodeCount} nodes and ${complexDiagram.edgeCount} edges`);
 
 // Generate HTML file with dark theme
 const complexHtml = visualizeDiagram(complexDiagram, 'html', { 
@@ -93,7 +93,7 @@ const complexHtml = visualizeDiagram(complexDiagram, 'html', {
 });
 
 // Create a decision tree example
-console.log('\n🌳 Creating decision tree example...');
+console.log('\nCreating decision tree example...');
 const decisionTree = FlowDiagramHelpers.createDecisionTree('User Login', [
   { condition: 'Valid Credentials?', next: 'Grant Access' },
   { condition: 'Invalid Password?', next: 'Show Error' },
@@ -102,23 +102,23 @@ const decisionTree = FlowDiagramHelpers.createDecisionTree('User Login', [
 
 const decisionHtml = visualizeDiagram(decisionTree, 'html', { theme: 'light' });
 fs.writeFileSync(path.join(outputDir, 'decision-tree.html'), decisionHtml);
-console.log('✅ Decision tree saved to examples/decision-tree.html');
+console.log('Decision tree saved to examples/decision-tree.html');
 
 const decisionSvg = visualizeDiagram(decisionTree, 'svg', { theme: 'light' });
 fs.writeFileSync(path.join(outputDir, 'decision-tree.svg'), decisionSvg);
-console.log('✅ Decision tree SVG saved to examples/decision-tree.svg');
+console.log('Decision tree SVG saved to examples/decision-tree.svg');
 
 // Create a linear flow example
-console.log('\n➡️ Creating linear flow example...');
+console.log('\n Creating linear flow example...');
 const linearFlow = FlowDiagramHelpers.createLinearFlow([
   'Start', 'Validate Input', 'Process Data', 'Generate Report', 'Send Email', 'End'
 ]);
 
 const linearHtml = visualizeDiagram(linearFlow, 'html', { theme: 'light' });
 fs.writeFileSync(path.join(outputDir, 'linear-flow.html'), linearHtml);
-console.log('✅ Linear flow saved to examples/linear-flow.html');
+console.log('Linear flow saved to examples/linear-flow.html');
 
-console.log('\n🎉 All examples generated!');
+console.log('\nAll examples generated!');
 console.log(`\nCheck out the files in the ${outputDir}/ directory:`);
 console.log('- simple-diagram.html (basic example)');
 console.log('- decision-tree.html (decision tree)');

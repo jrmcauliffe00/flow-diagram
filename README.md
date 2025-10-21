@@ -16,9 +16,17 @@ A powerful TypeScript library for creating, manipulating, and visualizing flow d
 ## Quick Start
 
 ```bash
+# Install dependencies
 npm install
+
+# Build the project
 npm run build
+
+# Run the demo
 npm run demo
+
+# Start the MCP server
+npm run mcp:dev
 ```
 
 ## Basic Usage
@@ -227,7 +235,79 @@ npm run demo
 
 ## MCP Integration
 
-This library is designed to work seamlessly with MCP (Model Context Protocol) servers. The flow diagram objects can be easily serialized and passed between the MCP server and LLM clients.
+This library includes a built-in MCP server that exposes flow diagram functionality to LLMs via HTTP API endpoints.
+
+### Starting the MCP Server
+
+```bash
+# Development mode (with auto-reload)
+npm run mcp:dev
+
+# Production mode
+npm run build
+npm run mcp:start
+```
+
+The server will be available at `http://localhost:3000` with these endpoints:
+
+- `GET /health` - Health check
+- `GET /mcp/tools` - List available MCP tools
+- `POST /mcp/tools/:toolName/execute` - Execute a specific tool
+
+### Available MCP Tools
+
+- `create_diagram` - Create a new flow diagram
+- `add_node` - Add a node to a diagram
+- `add_edge` - Add an edge between nodes
+- `visualize_diagram` - Generate visualizations (SVG, HTML, Mermaid, etc.)
+- `create_linear_flow` - Create a linear flow
+- `create_decision_tree` - Create a decision tree
+- `create_process_flow` - Create a process flow with parallel branches
+- `get_diagram_info` - Get diagram information
+- `list_diagrams` - List all diagrams
+
+### Example MCP Usage
+
+```bash
+# List available tools
+curl http://localhost:3000/mcp/tools
+
+# Create a linear flow
+curl -X POST http://localhost:3000/mcp/tools/create_linear_flow/execute \
+  -H "Content-Type: application/json" \
+  -d '{"parameters": {"labels": ["Start", "Process", "End"], "title": "My Flow"}}'
+```
+
+### Testing the MCP Server
+
+```bash
+# Run the client demo
+npx ts-node examples/mcp-client-demo.ts
+```
+
+### Connecting to Cursor
+
+To use the MCP server with Cursor, add this configuration to your Cursor MCP settings:
+
+**macOS:** `~/Library/Application Support/Cursor/User/globalStorage/cursor.mcp/config.json`
+**Windows:** `%APPDATA%\Cursor\User\globalStorage\cursor.mcp\config.json`
+**Linux:** `~/.config/Cursor/User/globalStorage/cursor.mcp/config.json`
+
+```json
+{
+  "mcpServers": {
+    "flow-diagram": {
+      "type": "http",
+      "url": "http://localhost:3000",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    }
+  }
+}
+```
+
+After updating the configuration, restart Cursor. You can then ask Cursor to create flow diagrams using natural language like "Create a flow diagram for user authentication" or "Make a decision tree for order processing".
 
 ## License
 
