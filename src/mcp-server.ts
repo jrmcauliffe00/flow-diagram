@@ -5,6 +5,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { v4 as uuidv4 } from 'uuid';
+import * as fs from 'fs';
+import * as path from 'path';
 import { FlowDiagram, FlowDiagramHelpers, FlowDiagramVisualizer } from './index';
 
 const app = express();
@@ -24,7 +26,7 @@ const diagrams = new Map<string, FlowDiagram>();
 interface MCPTool {
   name: string;
   description: string;
-  parameters: {
+  inputSchema: {
     type: 'object';
     properties: Record<string, any>;
     required: string[];
@@ -41,7 +43,7 @@ const mcpTools: MCPTool[] = [
   {
     name: 'create_diagram',
     description: 'Create a new flow diagram',
-    parameters: {
+    inputSchema: {
       type: 'object',
       properties: {
         title: { type: 'string', description: 'Title of the diagram' },
@@ -55,7 +57,7 @@ const mcpTools: MCPTool[] = [
   {
     name: 'add_node',
     description: 'Add a node to a flow diagram',
-    parameters: {
+    inputSchema: {
       type: 'object',
       properties: {
         diagramId: { type: 'string', description: 'ID of the diagram' },
@@ -85,7 +87,7 @@ const mcpTools: MCPTool[] = [
   {
     name: 'add_edge',
     description: 'Add an edge between two nodes',
-    parameters: {
+    inputSchema: {
       type: 'object',
       properties: {
         diagramId: { type: 'string', description: 'ID of the diagram' },
@@ -108,7 +110,7 @@ const mcpTools: MCPTool[] = [
   {
     name: 'visualize_diagram',
     description: 'Generate a visualization of the diagram',
-    parameters: {
+    inputSchema: {
       type: 'object',
       properties: {
         diagramId: { type: 'string', description: 'ID of the diagram' },
@@ -123,7 +125,9 @@ const mcpTools: MCPTool[] = [
           description: 'Theme for the visualization'
         },
         showLabels: { type: 'boolean', description: 'Whether to show labels' },
-        showGrid: { type: 'boolean', description: 'Whether to show grid' }
+        showGrid: { type: 'boolean', description: 'Whether to show grid' },
+        writeToFile: { type: 'boolean', description: 'Whether to write the visualization to a file in the current working directory' },
+        filename: { type: 'string', description: 'Optional custom filename (without extension). If not provided, uses diagram title or ID.' }
       },
       required: ['diagramId']
     }
@@ -131,7 +135,7 @@ const mcpTools: MCPTool[] = [
   {
     name: 'create_linear_flow',
     description: 'Create a linear flow diagram (A -> B -> C -> D)',
-    parameters: {
+    inputSchema: {
       type: 'object',
       properties: {
         labels: { 
@@ -147,7 +151,7 @@ const mcpTools: MCPTool[] = [
   {
     name: 'create_decision_tree',
     description: 'Create a decision tree diagram',
-    parameters: {
+    inputSchema: {
       type: 'object',
       properties: {
         rootLabel: { type: 'string', description: 'Label for the root decision' },
@@ -171,7 +175,7 @@ const mcpTools: MCPTool[] = [
   {
     name: 'create_process_flow',
     description: 'Create a process flow with optional parallel branches',
-    parameters: {
+    inputSchema: {
       type: 'object',
       properties: {
         steps: { 
@@ -197,7 +201,7 @@ const mcpTools: MCPTool[] = [
   {
     name: 'get_diagram_info',
     description: 'Get information about a diagram',
-    parameters: {
+    inputSchema: {
       type: 'object',
       properties: {
         diagramId: { type: 'string', description: 'ID of the diagram' }
@@ -208,7 +212,7 @@ const mcpTools: MCPTool[] = [
   {
     name: 'list_diagrams',
     description: 'List all available diagrams',
-    parameters: {
+    inputSchema: {
       type: 'object',
       properties: {},
       required: []
@@ -290,19 +294,80 @@ async function executeMCPTool(toolName: string, parameters: any): Promise<MCPToo
           return { success: false, error: 'Diagram not found' };
         }
 
+        const format = parameters.format || 'svg';
         const visualization = FlowDiagramVisualizer.visualize(diagram, {
-          format: parameters.format || 'svg',
+          format,
           theme: parameters.theme || 'light',
           layout: parameters.layout || 'hierarchical',
           showLabels: parameters.showLabels !== false,
           showGrid: parameters.showGrid || false
         });
 
+        let filePath = null;
+        if (parameters.writeToFile) {
+          try {
+            // Generate filename
+            let filename = parameters.filename;
+            if (!filename) {
+              filename = diagram.title || `diagram-${parameters.diagramId}`;
+              // Clean filename for filesystem
+              filename = filename.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();
+            }
+
+            // Add appropriate extension
+            const extension = format === 'html' ? 'html' : 
+                            format === 'mermaid' ? 'mmd' : 
+                            format === 'json' ? 'json' : 
+                            format === 'text' ? 'txt' : 'svg';
+            
+            const fullFilename = `${filename}.${extension}`;
+            filePath = path.join(process.cwd(), fullFilename);
+
+            // Write file based on format
+            if (format === 'html') {
+              // Wrap SVG in HTML if it's SVG format
+              const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${diagram.title}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+        .container { background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; }
+        .diagram { text-align: center; margin: 20px 0; }
+        svg { border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>${diagram.title}</h1>
+        <div class="diagram">
+            ${visualization}
+        </div>
+    </div>
+</body>
+</html>`;
+              fs.writeFileSync(filePath, htmlContent, 'utf8');
+            } else {
+              fs.writeFileSync(filePath, visualization, 'utf8');
+            }
+          } catch (error) {
+            console.error('Error writing file:', error);
+            return { 
+              success: false, 
+              error: `Failed to write file: ${error instanceof Error ? error.message : 'Unknown error'}` 
+            };
+          }
+        }
+
         return {
           success: true,
           data: {
-            format: parameters.format || 'svg',
-            visualization
+            format,
+            visualization,
+            ...(filePath && { filePath })
           }
         };
       }
@@ -415,14 +480,192 @@ app.get('/health', (req: any, res: any) => {
   });
 });
 
-// MCP Discovery endpoint
+// MCP Protocol endpoints
+app.all('/mcp', async (req: any, res: any) => {
+  try {
+    // Debug logging (can be removed in production)
+    // console.log(`MCP Request: ${req.method} ${req.url}`);
+
+    // Handle GET requests (some MCP clients try GET first)
+    if (req.method === 'GET') {
+      res.json({
+        jsonrpc: '2.0',
+        id: 1,
+        result: {
+          protocolVersion: '2025-06-18',
+          capabilities: {
+            tools: {},
+            prompts: {},
+            resources: {},
+            logging: {},
+            elicitation: {},
+            roots: {
+              listChanged: false
+            }
+          },
+          serverInfo: {
+            name: 'flow-diagram-mcp',
+            version: '1.0.0'
+          }
+        }
+      });
+      return;
+    }
+
+    // Handle POST requests with JSON-RPC
+    if (!req.body || typeof req.body !== 'object') {
+      res.status(400).json({
+        jsonrpc: '2.0',
+        id: null,
+        error: {
+          code: -32700,
+          message: 'Parse error: Invalid JSON'
+        }
+      });
+      return;
+    }
+
+    const { method, params, id } = req.body;
+    
+    // Validate required fields
+    if (!method) {
+      res.status(400).json({
+        jsonrpc: '2.0',
+        id: id || null,
+        error: {
+          code: -32600,
+          message: 'Invalid Request: missing method'
+        }
+      });
+      return;
+    }
+    
+    switch (method) {
+      case 'initialize': {
+        res.json({
+          jsonrpc: '2.0',
+          id,
+          result: {
+            protocolVersion: '2025-06-18',
+            capabilities: {
+              tools: {},
+              prompts: {},
+              resources: {},
+              logging: {},
+              elicitation: {},
+              roots: {
+                listChanged: false
+              }
+            },
+            serverInfo: {
+              name: 'flow-diagram-mcp',
+              version: '1.0.0'
+            }
+          }
+        });
+        break;
+      }
+      
+      case 'tools/list': {
+        res.json({
+          jsonrpc: '2.0',
+          id,
+          result: {
+            tools: mcpTools
+          }
+        });
+        break;
+      }
+      
+      case 'prompts/list': {
+        res.json({
+          jsonrpc: '2.0',
+          id,
+          result: {
+            prompts: []
+          }
+        });
+        break;
+      }
+      
+      case 'resources/list': {
+        res.json({
+          jsonrpc: '2.0',
+          id,
+          result: {
+            resources: []
+          }
+        });
+        break;
+      }
+      
+      case 'tools/call': {
+        const { name, arguments: args } = params || {};
+        if (!name) {
+          res.status(400).json({
+            jsonrpc: '2.0',
+            id,
+            error: {
+              code: -32602,
+              message: 'Invalid params: missing tool name'
+            }
+          });
+          return;
+        }
+        
+        const result = await executeMCPTool(name, args || {});
+        
+        res.json({
+          jsonrpc: '2.0',
+          id,
+          result: {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(result, null, 2)
+              }
+            ]
+          }
+        });
+        break;
+      }
+      
+      case 'notifications/initialized': {
+        // Handle initialization notification - notifications don't return responses
+        res.status(200).end();
+        break;
+      }
+      
+      default: {
+        res.status(400).json({
+          jsonrpc: '2.0',
+          id,
+          error: {
+            code: -32601,
+            message: `Method not found: ${method}`
+          }
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({
+      jsonrpc: '2.0',
+      id: req.body.id,
+      error: {
+        code: -32603,
+        message: error instanceof Error ? error.message : 'Internal error'
+      }
+    });
+  }
+});
+
+// Legacy endpoints for backward compatibility
 app.get('/mcp/tools', (req: any, res: any) => {
   res.json({
     tools: mcpTools
   });
 });
 
-// MCP Tool execution endpoint
 app.post('/mcp/tools/:toolName/execute', async (req: any, res: any) => {
   try {
     const { toolName } = req.params;
