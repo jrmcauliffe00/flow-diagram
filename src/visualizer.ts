@@ -29,8 +29,39 @@ export class FlowDiagramVisualizer {
   private static toSVG(diagram: FlowDiagram, options: VisualizationOptions): string {
     const nodes = diagram.getAllNodes();
     const edges = diagram.getAllEdges();
-    const width = 800;
-    const height = 600;
+    
+    // Calculate dimensions based on actual node positions
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    
+    nodes.forEach(node => {
+      if (node.position) {
+        const nodeWidth = node.style?.width || 100;
+        const nodeHeight = node.style?.height || 50;
+        const x = node.position.x;
+        const y = node.position.y;
+        
+        minX = Math.min(minX, x - nodeWidth/2);
+        maxX = Math.max(maxX, x + nodeWidth/2);
+        minY = Math.min(minY, y - nodeHeight/2);
+        maxY = Math.max(maxY, y + nodeHeight/2);
+      }
+    });
+    
+    // Add padding - default to minimum size if no nodes or invalid bounds
+    const padding = 100;
+    let width = 800;
+    let height = 600;
+    let offsetX = 0;
+    let offsetY = 0;
+    
+    if (nodes.length > 0 && minX !== Infinity && maxX !== -Infinity) {
+      width = Math.max(800, maxX - minX + padding * 2);
+      height = Math.max(600, maxY - minY + padding * 2);
+      offsetX = -minX + padding;
+      offsetY = -minY + padding;
+    }
+    
     const theme = options.theme || 'light';
     
     const bgColor = theme === 'dark' ? '#1a1a1a' : '#ffffff';
@@ -58,10 +89,10 @@ export class FlowDiagramVisualizer {
       const targetNode = diagram.getNode(edge.targetId);
       
       if (sourceNode && targetNode && sourceNode.position && targetNode.position) {
-        const x1 = sourceNode.position.x;
-        const y1 = sourceNode.position.y;
-        const x2 = targetNode.position.x;
-        const y2 = targetNode.position.y;
+        const x1 = sourceNode.position.x + offsetX;
+        const y1 = sourceNode.position.y + offsetY;
+        const x2 = targetNode.position.x + offsetX;
+        const y2 = targetNode.position.y + offsetY;
         
         // Calculate arrow direction
         const dx = x2 - x1;
@@ -97,8 +128,8 @@ export class FlowDiagramVisualizer {
     nodes.forEach(node => {
       if (!node.position) return;
       
-      const x = node.position.x;
-      const y = node.position.y;
+      const x = node.position.x + offsetX;
+      const y = node.position.y + offsetY;
       const nodeWidth = node.style?.width || 100;
       const nodeHeight = node.style?.height || 50;
       const rx = node.style?.borderRadius || 5;

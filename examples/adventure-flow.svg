@@ -1,0 +1,140 @@
+<svg width="1200" height="1400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#1a0f1e"/>
+  
+  <!-- Title -->
+  <text x="600" y="30" text-anchor="middle" fill="#d4af37" font-size="28" font-family="Arial, sans-serif" font-weight="bold">⚔️ Dungeon Adventure - Choose Your Path ⚔️</text>
+  
+  <!-- START: Enter the Dungeon -->
+  <rect x="530" y="60" width="140" height="50" rx="10" ry="10" fill="#8b0000" stroke="#ff6b6b" stroke-width="3"/>
+  <text x="600" y="85" text-anchor="middle" fill="#ffffff" font-size="14" font-family="Arial, sans-serif" font-weight="bold">Enter the Dungeon</text>
+  
+  <!-- Arrow down from Start -->
+  <line x1="600" y1="110" x2="600" y2="170" stroke="#d4af37" stroke-width="3"/>
+  <polygon points="600,170 610,155 605,170" fill="#d4af37"/>
+  
+  <!-- DECISION 1: Choose Your Path -->
+  <polygon points="600,180 650,200 600,220 550,200" fill="#8b4513" stroke="#d4af37" stroke-width="2"/>
+  <text x="600" y="205" text-anchor="middle" fill="#ffffff" font-size="12" font-family="Arial, sans-serif" font-weight="bold">Choose Your</text>
+  <text x="600" y="220" text-anchor="middle" fill="#ffffff" font-size="12" font-family="Arial, sans-serif" font-weight="bold">Path</text>
+  
+  <!-- Path A: Follow the Light -->
+  <line x1="550" y1="200" x2="450" y2="280" stroke="#ffd700" stroke-width="2"/>
+  <polygon points="450,280 460,270 455,285" fill="#ffd700"/>
+  
+  <!-- Path A Node -->
+  <rect x="400" y="280" width="100" height="60" rx="8" ry="8" fill="#ffd700" stroke="#ffaa00" stroke-width="2"/>
+  <text x="450" y="300" text-anchor="middle" fill="#8b4513" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Follow the</text>
+  <text x="450" y="315" text-anchor="middle" fill="#8b4513" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Mysterious</text>
+  <text x="450" y="330" text-anchor="middle" fill="#8b4513" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Light ⚡</text>
+  
+  <!-- Arrow down from Path A -->
+  <line x1="450" y1="340" x2="450" y2="390" stroke="#ffd700" stroke-width="2"/>
+  
+  <!-- Path A Decision -->
+  <polygon points="450,390 490,420 450,450 410,420" fill="#ffd700" stroke="#ffaa00" stroke-width="2"/>
+  <text x="450" y="425" text-anchor="middle" fill="#8b4513" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Take the</text>
+  <text x="450" y="440" text-anchor="middle" fill="#8b4513" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Treasure? 💎</text>
+  
+  <!-- Path B: Dark Corridor -->
+  <line x1="600" y1="220" x2="600" y2="280" stroke="#8b4513" stroke-width="2"/>
+  
+  <!-- Path B Node -->
+  <rect x="550" y="280" width="100" height="60" rx="8" ry="8" fill="#2d1b3d" stroke="#6b46c1" stroke-width="2"/>
+  <text x="600" y="305" text-anchor="middle" fill="#c9b3ff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Enter the Dark</text>
+  <text x="600" y="320" text-anchor="middle" fill="#c9b3ff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Corridor 🌑</text>
+  
+  <!-- Arrow down from Path B -->
+  <line x1="600" y1="340" x2="600" y2="390" stroke="#8b4513" stroke-width="2"/>
+  
+  <!-- Path B Decision -->
+  <polygon points="600,390 640,420 600,450 560,420" fill="#2d1b3d" stroke="#6b46c1" stroke-width="2"/>
+  <text x="600" y="420" text-anchor="middle" fill="#c9b3ff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Fight the</text>
+  <text x="600" y="435" text-anchor="middle" fill="#c9b3ff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Shadow? ⚔️</text>
+  
+  <!-- Path C: Search Chamber -->
+  <line x1="650" y1="200" x2="750" y2="280" stroke="#228b22" stroke-width="2"/>
+  <polygon points="750,280 740,270 750,285" fill="#228b22"/>
+  
+  <!-- Path C Node -->
+  <rect x="700" y="280" width="100" height="60" rx="8" ry="8" fill="#006400" stroke="#32cd32" stroke-width="2"/>
+  <text x="750" y="305" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Search the</text>
+  <text x="750" y="320" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Ancient</text>
+  <text x="750" y="335" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Chamber 📜</text>
+  
+  <!-- Arrow down from Path C -->
+  <line x1="750" y1="340" x2="750" y2="390" stroke="#228b22" stroke-width="2"/>
+  
+  <!-- Path C Decision -->
+  <polygon points="750,390 790,420 750,450 710,420" fill="#006400" stroke="#32cd32" stroke-width="2"/>
+  <text x="750" y="420" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Read the</text>
+  <text x="750" y="435" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Scroll? 📖</text>
+  
+  <!-- Now merge paths -->
+  
+  <!-- From Path A Decision -->
+  <line x1="410" y1="420" x2="250" y2="530" stroke="#ffd700" stroke-width="2"/>
+  <line x1="490" y1="420" x2="550" y2="530" stroke="#ffd700" stroke-width="2"/>
+  
+  <!-- Path A - Yes -->
+  <rect x="200" y="530" width="100" height="50" rx="8" ry="8" fill="#ffd700" stroke="#ffaa00" stroke-width="2"/>
+  <text x="250" y="555" text-anchor="middle" fill="#8b4513" font-size="11" font-family="Arial, sans-serif" font-weight="bold">You Found</text>
+  <text x="250" y="570" text-anchor="middle" fill="#8b4513" font-size="11" font-family="Arial, sans-serif" font-weight="bold">a Magic Sword</text>
+  
+  <!-- Path A - No -->
+  <rect x="500" y="530" width="100" height="50" rx="8" ry="8" fill="#696969" stroke="#a0a0a0" stroke-width="2"/>
+  <text x="550" y="555" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">You Avoid</text>
+  <text x="550" y="570" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">the Trap</text>
+  
+  <!-- From Path B Decision -->
+  <line x1="560" y1="420" x2="500" y2="530" stroke="#2d1b3d" stroke-width="2"/>
+  <line x1="640" y1="420" x2="700" y2="530" stroke="#2d1b3d" stroke-width="2"/>
+  
+  <!-- Path B - Yes -->
+  <rect x="650" y="530" width="100" height="50" rx="8" ry="8" fill="#8b0000" stroke="#ff0000" stroke-width="2"/>
+  <text x="700" y="555" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">You Defeat</text>
+  <text x="700" y="570" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">the Shadow</text>
+  
+  <!-- From Path C Decision -->
+  <line x1="710" y1="420" x2="850" y2="530" stroke="#006400" stroke-width="2"/>
+  <line x1="790" y1="420" x2="700" y2="530" stroke="#006400" stroke-width="2"/>
+  
+  <!-- Path C - Yes -->
+  <rect x="800" y="530" width="100" height="50" rx="8" ry="8" fill="#4b0082" stroke="#9370db" stroke-width="2"/>
+  <text x="850" y="555" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">You Learn a</text>
+  <text x="850" y="570" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Powerful Spell 🔮</text>
+  
+  <!-- Arrows down from all outcomes -->
+  <line x1="250" y1="580" x2="250" y2="650" stroke="#d4af37" stroke-width="2"/>
+  <line x1="550" y1="580" x2="500" y2="650" stroke="#d4af37" stroke-width="2"/>
+  <line x1="700" y1="580" x2="650" y2="650" stroke="#d4af37" stroke-width="2"/>
+  <line x1="850" y1="580" x2="900" y2="650" stroke="#d4af37" stroke-width="2"/>
+  
+  <!-- Merge point decision -->
+  <polygon points="550,650 650,680 550,710 450,680" fill="#8b4513" stroke="#d4af37" stroke-width="2"/>
+  <text x="550" y="680" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Ready for</text>
+  <text x="550" y="695" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Final Battle?</text>
+  
+  <line x1="650" y1="680" x2="700" y2="750" stroke="#d4af37" stroke-width="2"/>
+  <line x1="450" y1="680" x2="500" y2="750" stroke="#d4af37" stroke-width="2"/>
+  
+  <!-- Final branch -->
+  <rect x="650" y="750" width="100" height="50" rx="8" ry="8" fill="#32cd32" stroke="#228b22" stroke-width="2"/>
+  <text x="700" y="770" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Charge Into</text>
+  <text x="700" y="785" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">the Boss! ⚔️</text>
+  
+  <rect x="450" y="750" width="100" height="50" rx="8" ry="8" fill="#ff6347" stroke="#dc143c" stroke-width="2"/>
+  <text x="500" y="770" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Retreat and</text>
+  <text x="500" y="785" text-anchor="middle" fill="#ffffff" font-size="11" font-family="Arial, sans-serif" font-weight="bold">Plan Strategy</text>
+  
+  <!-- Final arrows -->
+  <line x1="700" y1="800" x2="600" y2="900" stroke="#d4af37" stroke-width="3"/>
+  <line x1="500" y1="800" x2="600" y2="900" stroke="#d4af37" stroke-width="3"/>
+  
+  <!-- FINAL END NODE -->
+  <rect x="530" y="900" width="140" height="60" rx="10" ry="10" fill="#ffd700" stroke="#ffaa00" stroke-width="4"/>
+  <text x="600" y="920" text-anchor="middle" fill="#8b4513" font-size="12" font-family="Arial, sans-serif" font-weight="bold">YOU DEFEATED</text>
+  <text x="600" y="940" text-anchor="middle" fill="#8b4513" font-size="12" font-family="Arial, sans-serif" font-weight="bold">THE DRAGON! 🐉</text>
+  <text x="600" y="955" text-anchor="middle" fill="#8b4513" font-size="10" font-family="Arial, sans-serif" font-weight="bold">Victory! 🎉</text>
+</svg>
+

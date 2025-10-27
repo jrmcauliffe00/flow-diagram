@@ -32,6 +32,63 @@ npm run demo
 npm run mcp:dev
 ```
 
+## Visual Comparison
+
+See the difference between manually created SVG and MCP-generated diagrams:
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**Manually Created SVG**  
+*(examples/adventure-flow.svg)*
+
+</td>
+<td width="50%" valign="top">
+
+**MCP-Generated SVG**  
+*(examples/dragon-slayer.svg)*
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+<img src="examples/adventure-flow.svg" alt="Adventure Flow - Manually Created" style="width: 100%; border: 1px solid #ddd; border-radius: 4px;"/>
+
+**Characteristics:**
+- Fixed dimensions (1200x1400)
+- Manual positioning
+- Static layout
+- Requires manual updates
+
+</td>
+<td width="50%">
+
+<img src="examples/dragon-slayer.svg" alt="Dragon Slayer - MCP Generated" style="width: 100%; border: 1px solid #ddd; border-radius: 4px;"/>
+
+**Characteristics:**
+- Auto-fitted dimensions (2600x800)
+- Programmatic positioning
+- Dynamic layout
+- Easy to modify via MCP
+
+</td>
+</tr>
+</table>
+
+### Key Differences
+
+| Feature | Manual SVG | MCP-Generated |
+|---------|------------|---------------|
+| **Dimensions** | Fixed at 1200x1400 | Auto-calculated (2600x800) |
+| **Complexity** | ~140 lines of SVG | Generated from ~35 nodes |
+| **Modification** | Edit SVG code | Modify via API |
+| **Scalability** | Manual scaling | Automatic fitting |
+| **Maintenance** | High effort | Low effort |
+
+The MCP-generated diagram automatically sizes to fit all content, while the manually created one uses fixed dimensions that may not accommodate future changes.
+
 ## Basic Usage
 
 ```typescript
