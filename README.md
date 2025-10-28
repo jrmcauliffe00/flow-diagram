@@ -34,13 +34,23 @@ npm run mcp:dev
 
 ## Visual Comparison
 
-See the difference between manually created SVG and MCP-generated diagrams:
+See the difference between **LLM-generated** flow-chart and **LLM + MCP-generated** diagrams.
+
+*Built using the same prompt.*
+
+```text
+Can you make a complicated flow diagram for my adventure "choose your own adventure series". It should start at 1 place, then based on certain decisions, lead you down some paths. In the end, everything should lead you back to a single now.
+
+Use whatever fantasy events you want to. Think "dungeons and dragons".
+
+Generate an svg file [(WITHOUT)] using my flow-diagram mcp.
+```
 
 <table>
 <tr>
 <td width="50%" valign="top">
 
-**Manually Created SVG**  
+**Brute-force SVG**  
 *(examples/adventure-flow.svg)*
 
 </td>
@@ -56,22 +66,12 @@ See the difference between manually created SVG and MCP-generated diagrams:
 
 <img src="examples/adventure-flow.svg" alt="Adventure Flow - Manually Created" style="width: 100%; border: 1px solid #ddd; border-radius: 4px;"/>
 
-**Characteristics:**
-- Fixed dimensions (1200x1400)
-- Manual positioning
-- Static layout
-- Requires manual updates
 
 </td>
 <td width="50%">
 
 <img src="examples/dragon-slayer.svg" alt="Dragon Slayer - MCP Generated" style="width: 100%; border: 1px solid #ddd; border-radius: 4px;"/>
 
-**Characteristics:**
-- Auto-fitted dimensions (2600x800)
-- Programmatic positioning
-- Dynamic layout
-- Easy to modify via MCP
 
 </td>
 </tr>
@@ -79,11 +79,11 @@ See the difference between manually created SVG and MCP-generated diagrams:
 
 ### Key Differences
 
-| Feature | Manual SVG | MCP-Generated |
+| Feature | Brute-force SVG | MCP-Generated |
 |---------|------------|---------------|
 | **Dimensions** | Fixed at 1200x1400 | Auto-calculated (2600x800) |
-| **Complexity** | ~140 lines of SVG | Generated from ~35 nodes |
-| **Modification** | Edit SVG code | Modify via API |
+| **Complexity** | ~140 lines of SVG | Generated from ~35 nodes, 3 Tool Calls |
+| **Modification** | Manual SVG edits | Modify via API |
 | **Scalability** | Manual scaling | Automatic fitting |
 | **Maintenance** | High effort | Low effort |
 
