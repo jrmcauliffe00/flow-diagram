@@ -335,4 +335,134 @@ export class FlowDiagramHelpers {
       errors
     };
   }
+
+  /**
+   * Parse diagram data from various formats (JSON, text, or partial structure)
+   */
+  static parseDiagramData(data: string | object, format?: 'json' | 'text' | 'auto'): {
+    nodes?: any[];
+    edges?: any[];
+    options?: any;
+    title?: string;
+  } {
+    const formatType = format || 'auto';
+
+    // If it's already an object, try to use it directly
+    if (typeof data === 'object' && data !== null) {
+      // Check if it's a valid FlowDiagram JSON structure
+      if ('nodes' in data && 'edges' in data) {
+        return {
+          nodes: (data as any).nodes,
+          edges: (data as any).edges,
+          options: (data as any).options,
+          title: (data as any).options?.title || (data as any).title
+        };
+      }
+      // If it's just nodes/edges at top level
+      if ('nodes' in data || 'edges' in data) {
+        return {
+          nodes: (data as any).nodes,
+          edges: (data as any).edges
+        };
+      }
+    }
+
+    // If it's a string, parse it
+    if (typeof data === 'string') {
+      // Try JSON first
+      if (formatType === 'json' || formatType === 'auto') {
+        try {
+          const parsed = JSON.parse(data);
+          if ('nodes' in parsed || 'edges' in parsed) {
+            return {
+              nodes: parsed.nodes,
+              edges: parsed.edges,
+              options: parsed.options,
+              title: parsed.title || parsed.options?.title
+            };
+          }
+        } catch (e) {
+          // Not JSON, continue to text parsing
+        }
+      }
+
+      // Try text format parsing
+      if (formatType === 'text' || formatType === 'auto') {
+        return this.parseTextFormat(data);
+      }
+    }
+
+    throw new Error('Unable to parse diagram data. Expected JSON with nodes/edges or text format.');
+  }
+
+  /**
+   * Parse text format diagram representation
+   */
+  private static parseTextFormat(text: string): {
+    nodes: any[];
+    edges: any[];
+    title?: string;
+  } {
+    const nodes: any[] = [];
+    const edges: any[] = [];
+    let title = '';
+    
+    const lines = text.split('\n');
+    let inNodesSection = false;
+    let inEdgesSection = false;
+    const nodeMap = new Map<string, string>(); // label -> id
+    
+    for (const line of lines) {
+      const trimmed = line.trim();
+      
+      // Extract title
+      if (trimmed.startsWith('Flow Diagram:')) {
+        title = trimmed.replace('Flow Diagram:', '').trim();
+        continue;
+      }
+      
+      // Section markers
+      if (trimmed === 'Nodes:') {
+        inNodesSection = true;
+        inEdgesSection = false;
+        continue;
+      }
+      if (trimmed === 'Edges:') {
+        inNodesSection = false;
+        inEdgesSection = true;
+        continue;
+      }
+      
+      // Parse node lines: "  - node_1: Label (type)"
+      if (inNodesSection && trimmed.startsWith('-')) {
+        const match = trimmed.match(/- (\w+): (.+?)(?: \((.+)\))?$/);
+        if (match) {
+          const [, nodeId, label, type] = match;
+          nodes.push({
+            id: nodeId,
+            label: label.trim(),
+            type: type || 'process'
+          });
+          nodeMap.set(label.trim(), nodeId);
+        }
+      }
+      
+      // Parse edge lines: "  - Source Label -> Target Label (label)"
+      if (inEdgesSection && trimmed.startsWith('-')) {
+        const match = trimmed.match(/- (.+?) -> (.+?)(?: \((.+)\))?$/);
+        if (match) {
+          const [, sourceLabel, targetLabel, edgeLabel] = match;
+          const sourceId = nodeMap.get(sourceLabel.trim()) || sourceLabel.trim();
+          const targetId = nodeMap.get(targetLabel.trim()) || targetLabel.trim();
+          edges.push({
+            sourceId,
+            targetId,
+            label: edgeLabel || undefined
+          });
+        }
+      }
+    }
+    
+    return { nodes, edges, title: title || undefined };
+  }
 }

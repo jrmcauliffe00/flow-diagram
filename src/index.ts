@@ -32,6 +32,7 @@ export function visualizeDiagram(
   options?: {
     theme?: 'light' | 'dark';
     layout?: 'hierarchical' | 'force' | 'circular' | 'grid';
+    orientation?: 'horizontal' | 'vertical';
     showLabels?: boolean;
     showGrid?: boolean;
   }

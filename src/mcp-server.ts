@@ -7,7 +7,7 @@ import morgan from 'morgan';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
-import { FlowDiagram, FlowDiagramHelpers, FlowDiagramVisualizer } from './index';
+import { FlowDiagram, FlowDiagramHelpers, FlowDiagramVisualizer, visualizeDiagram } from './index';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -124,6 +124,11 @@ const mcpTools: MCPTool[] = [
           enum: ['light', 'dark'],
           description: 'Theme for the visualization'
         },
+        orientation: {
+          type: 'string',
+          enum: ['horizontal', 'vertical'],
+          description: 'Orientation of the diagram flow (horizontal = left-to-right, vertical = top-to-bottom)'
+        },
         showLabels: { type: 'boolean', description: 'Whether to show labels' },
         showGrid: { type: 'boolean', description: 'Whether to show grid' },
         writeToFile: { type: 'boolean', description: 'Whether to write the visualization to a file in the current working directory' },
@@ -217,6 +222,51 @@ const mcpTools: MCPTool[] = [
       properties: {},
       required: []
     }
+  },
+  {
+    name: 'build_complete_flow_chart',
+    description: 'Build the complete flow chart and output as a file (svg, html, mermaid, json, text)',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        nodes: { type: 'array', description: 'The nodes of the flow chart' },
+        edges: { type: 'array', description: 'The edges of the flow chart' },
+        title: { type: 'string', description: 'The title of the flow chart' },
+        parallelNodes: { type: 'array', description: 'The parallel nodes of the flow chart' },
+        format: { type: 'string', description: 'The format of the output file' },
+        theme: { type: 'string', description: 'The theme of the output file' },
+        orientation: { type: 'string', enum: ['horizontal', 'vertical'], description: 'Orientation of the diagram flow' },
+        showLabels: { type: 'boolean', description: 'Whether to show labels' },
+        showGrid: { type: 'boolean', description: 'Whether to show grid' },
+        writeToFile: { type: 'boolean', description: 'Whether to write the visualization to a file in the current working directory' },
+        filename: { type: 'string', description: 'Optional custom filename (without extension). If not provided, uses diagram title or ID.' }
+      },
+      required: []
+    }
+  },
+  {
+    name: 'edit_diagram',
+    description: 'Edit an existing diagram by importing data from JSON, text, or object format. If diagramId is not provided, creates a new diagram.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        diagramId: { type: 'string', description: 'ID of the diagram to edit. If not provided, creates a new diagram.' },
+        diagramData: { 
+          type: ['string', 'object'],
+          description: 'Diagram data in JSON string, text format, or object. Must contain nodes and/or edges.'
+        },
+        format: { 
+          type: 'string',
+          enum: ['json', 'text', 'auto'],
+          description: 'Format of the input data. "auto" will try to detect automatically.'
+        },
+        merge: { 
+          type: 'boolean',
+          description: 'If true, merge with existing diagram. If false, replace existing diagram. Default: false'
+        }
+      },
+      required: ['diagramData']
+    }
   }
 ];
 
@@ -295,10 +345,9 @@ async function executeMCPTool(toolName: string, parameters: any): Promise<MCPToo
         }
 
         const format = parameters.format || 'svg';
-        const visualization = FlowDiagramVisualizer.visualize(diagram, {
-          format,
+        const visualization = visualizeDiagram(diagram, format, {
           theme: parameters.theme || 'light',
-          layout: parameters.layout || 'hierarchical',
+          orientation: parameters.orientation || 'vertical',
           showLabels: parameters.showLabels !== false,
           showGrid: parameters.showGrid || false
         });
@@ -444,6 +493,151 @@ async function executeMCPTool(toolName: string, parameters: any): Promise<MCPToo
         };
       }
 
+      case 'build_complete_flow_chart': {
+        const {
+          nodes = [],
+          edges = [],
+          title = 'Untitled Flow Diagram',
+          parallelNodes = [],
+          format = 'json',
+          theme = 'default',
+          showLabels = true,
+          showGrid = false,
+          writeToFile = false,
+          filename
+        } = parameters;
+      
+        // Create new diagram
+        const diagram = new FlowDiagram();
+      
+        // Add nodes
+        const nodeIdMap = new Map();
+        for (const node of nodes) {
+          const nodeId = diagram.addNode({
+            label: node.label || node.name || 'Unnamed',
+            type: node.type || 'process',
+            position: node.position,
+            style: node.style,
+          });
+          nodeIdMap.set(node.id || node.label, nodeId);
+        }
+      
+        // Add edges
+        for (const edge of edges) {
+          const sourceId = nodeIdMap.get(edge.sourceId) || edge.sourceId;
+          const targetId = nodeIdMap.get(edge.targetId) || edge.targetId;
+          if (sourceId && targetId) {
+            diagram.addEdge({
+              sourceId,
+              targetId,
+              label: edge.label,
+              style: edge.style,
+            });
+          }
+        }
+      
+        // Handle parallel groups if provided
+        for (const group of parallelNodes) {
+          const parentId = nodeIdMap.get(group.parentId);
+          if (!parentId) continue;
+          for (const pnode of group.nodes || []) {
+            const parallelId = diagram.addNode({
+              label: pnode.label,
+              type: 'parallel',
+              style: pnode.style || { backgroundColor: '#e1f5fe', borderColor: '#00bcd4' },
+            });
+            diagram.addEdge({ sourceId: parentId, targetId: parallelId });
+          }
+        }
+      
+        // Layout & validate
+        diagram.autoLayout('hierarchical');
+        const validation = FlowDiagramHelpers.validate(diagram);
+      
+        // Register the new diagram in memory
+        diagrams.set(title, diagram);
+      
+        // Visualize
+        const visualization = visualizeDiagram(diagram, format, {
+          theme: theme || 'light',
+          orientation: parameters.orientation || 'vertical',
+          showLabels: showLabels !== false,
+          showGrid: showGrid || false
+        });
+
+        let filePath = null;
+        if (writeToFile) {
+          try {
+            // Generate filename
+            let file = filename;
+            if (!file) {
+              file = title || `diagram-${title}`;
+              // Clean filename for filesystem
+              file = file.replace(/[^a-zA-Z0-9-_]/g, '-').toLowerCase();
+            }
+
+            // Add appropriate extension
+            const extension = format === 'html' ? 'html' : 
+                            format === 'mermaid' ? 'mmd' : 
+                            format === 'json' ? 'json' : 
+                            format === 'text' ? 'txt' : 'svg';
+            
+            const fullFilename = `${file}.${extension}`;
+            filePath = path.join(process.cwd(), fullFilename);
+
+            // Write file based on format
+            if (format === 'html') {
+              // Wrap SVG in HTML if it's SVG format
+              const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+        .container { background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; }
+        .diagram { text-align: center; margin: 20px 0; }
+        svg { border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>${title}</h1>
+        <div class="diagram">
+            ${visualization}
+        </div>
+    </div>
+</body>
+</html>`;
+              fs.writeFileSync(filePath, htmlContent, 'utf8');
+            } else {
+              fs.writeFileSync(filePath, visualization, 'utf8');
+            }
+          } catch (error) {
+            console.error('Error writing file:', error);
+            return { 
+              success: false, 
+              error: `Failed to write file: ${error instanceof Error ? error.message : 'Unknown error'}` 
+            };
+          }
+        }
+      
+        return {
+          success: true,
+          data: {
+            title,
+            nodeCount: diagram.getAllNodes().length,
+            edgeCount: diagram.getAllEdges().length,
+            validation,
+            visualization,
+            ...(filePath && { filePath })
+          },
+        };
+      }
+
+
       case 'list_diagrams': {
         const diagramList = Array.from(diagrams.entries()).map(([id, diagram]) => ({
           id,
@@ -458,6 +652,125 @@ async function executeMCPTool(toolName: string, parameters: any): Promise<MCPToo
             diagrams: diagramList
           }
         };
+      }
+
+      case 'edit_diagram': {
+        try {
+          const { diagramId, diagramData, format = 'auto', merge = false } = parameters;
+          
+          // Parse the diagram data
+          const parsed = FlowDiagramHelpers.parseDiagramData(diagramData, format);
+          
+          // Get or create diagram
+          let diagram: FlowDiagram;
+          let finalId: string;
+          
+          if (diagramId && diagrams.has(diagramId)) {
+            diagram = diagrams.get(diagramId)!;
+            finalId = diagramId;
+            
+            if (!merge) {
+              // Replace: clear existing nodes and edges
+              diagram.getAllNodes().forEach(node => diagram.removeNode(node.id));
+            }
+          } else {
+            // Create new diagram
+            diagram = new FlowDiagram({
+              title: parsed.title || 'Edited Flow Diagram',
+              ...parsed.options
+            });
+            finalId = diagramId || uuidv4();
+          }
+          
+          // Map existing node IDs for merging
+          const existingNodeMap = new Map<string, string>(); // label -> id
+          if (merge) {
+            diagram.getAllNodes().forEach(node => {
+              existingNodeMap.set(node.label, node.id);
+            });
+          }
+          
+          // Add or update nodes
+          const nodeIdMap = new Map<string, string>(); // parsed node id -> actual node id
+          if (parsed.nodes) {
+            for (const nodeData of parsed.nodes) {
+              let nodeId: string;
+              
+              if (merge && existingNodeMap.has(nodeData.label)) {
+                // Update existing node
+                nodeId = existingNodeMap.get(nodeData.label)!;
+                diagram.updateNode(nodeId, {
+                  label: nodeData.label,
+                  type: nodeData.type,
+                  position: nodeData.position,
+                  style: nodeData.style,
+                  ...nodeData
+                });
+              } else {
+                // Add new node
+                nodeId = diagram.addNode({
+                  label: nodeData.label || 'Unnamed',
+                  type: nodeData.type || 'process',
+                  position: nodeData.position,
+                  style: nodeData.style,
+                  data: nodeData.data
+                });
+              }
+              
+              nodeIdMap.set(nodeData.id || nodeData.label, nodeId);
+            }
+          }
+          
+          // Add or update edges
+          if (parsed.edges) {
+            for (const edgeData of parsed.edges) {
+              const sourceId = nodeIdMap.get(edgeData.sourceId) || edgeData.sourceId;
+              const targetId = nodeIdMap.get(edgeData.targetId) || edgeData.targetId;
+              
+              // Check if nodes exist
+              if (!diagram.getNode(sourceId) || !diagram.getNode(targetId)) {
+                continue; // Skip invalid edges
+              }
+              
+              try {
+                diagram.addEdge({
+                  sourceId,
+                  targetId,
+                  label: edgeData.label,
+                  style: edgeData.style,
+                  data: edgeData.data
+                });
+              } catch (e) {
+                // Edge might already exist, skip
+              }
+            }
+          }
+          
+          // Update title if provided
+          if (parsed.title && !merge) {
+            diagram['options'].title = parsed.title;
+          }
+          
+          // Store the diagram
+          diagrams.set(finalId, diagram);
+          
+          return {
+            success: true,
+            data: {
+              diagramId: finalId,
+              title: diagram.title,
+              nodeCount: diagram.nodeCount,
+              edgeCount: diagram.edgeCount,
+              merged: merge,
+              diagram: diagram.toJSON()
+            }
+          };
+        } catch (error) {
+          return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to edit diagram'
+          };
+        }
       }
 
       default:

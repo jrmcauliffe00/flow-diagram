@@ -59,6 +59,7 @@ export interface VisualizationOptions {
   format: 'svg' | 'html' | 'json' | 'mermaid';
   theme?: 'light' | 'dark';
   layout?: 'hierarchical' | 'force' | 'circular' | 'grid';
+  orientation?: 'horizontal' | 'vertical';
   showLabels?: boolean;
   showGrid?: boolean;
 }

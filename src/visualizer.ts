@@ -24,22 +24,83 @@ export class FlowDiagramVisualizer {
   }
 
   /**
+   * Escape XML special characters
+   */
+  private static escapeXml(text: string): string {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  /**
+   * Estimate text width in pixels
+   */
+  private static estimateTextWidth(text: string, fontSize: number = 14, fontFamily: string = 'Arial, sans-serif'): number {
+    // Approximate: average character width is about 0.6 * fontSize for Arial
+    // Adjust for font family (serif fonts are slightly wider)
+    const avgCharWidth = fontFamily.includes('monospace') ? fontSize * 0.6 : fontSize * 0.55;
+    return text.length * avgCharWidth;
+  }
+
+  /**
+   * Calculate appropriate node dimensions based on label
+   */
+  private static calculateNodeDimensions(node: Node): { width: number; height: number } {
+    const fontSize = node.style?.fontSize || 14;
+    const fontFamily = node.style?.fontFamily || 'Arial, sans-serif';
+    const label = node.label || '';
+    
+    // Estimate text width
+    const textWidth = this.estimateTextWidth(label, fontSize, fontFamily);
+    
+    // Calculate node width: text width + padding (40px on each side)
+    const minWidth = 100;
+    const calculatedWidth = Math.max(minWidth, textWidth + 40);
+    
+    // Calculate node height: estimate based on text length and wrapping
+    // For long labels, we might need multiple lines
+    const maxCharsPerLine = Math.floor(calculatedWidth / (fontSize * 0.55));
+    const numLines = Math.max(1, Math.ceil(label.length / maxCharsPerLine));
+    const calculatedHeight = Math.max(50, numLines * (fontSize + 8) + 20);
+    
+    // Use explicit style dimensions if provided, otherwise use calculated
+    return {
+      width: node.style?.width || calculatedWidth,
+      height: node.style?.height || calculatedHeight
+    };
+  }
+
+  /**
    * Generate SVG representation
    */
   private static toSVG(diagram: FlowDiagram, options: VisualizationOptions): string {
     const nodes = diagram.getAllNodes();
     const edges = diagram.getAllEdges();
+    const orientation = options.orientation || 'vertical';
+    const isHorizontal = orientation === 'horizontal';
+    
+    // First pass: calculate node dimensions for all nodes
+    const nodeDimensions = new Map<string, { width: number; height: number }>();
+    nodes.forEach(node => {
+      nodeDimensions.set(node.id, this.calculateNodeDimensions(node));
+    });
     
     // Calculate dimensions based on actual node positions
+    // For horizontal orientation, we swap x/y when calculating bounds
     let minX = Infinity, maxX = -Infinity;
     let minY = Infinity, maxY = -Infinity;
     
     nodes.forEach(node => {
       if (node.position) {
-        const nodeWidth = node.style?.width || 100;
-        const nodeHeight = node.style?.height || 50;
-        const x = node.position.x;
-        const y = node.position.y;
+        const dims = nodeDimensions.get(node.id) || { width: 100, height: 50 };
+        const nodeWidth = dims.width;
+        const nodeHeight = dims.height;
+        // Swap coordinates for horizontal layout
+        const x = isHorizontal ? node.position.y : node.position.x;
+        const y = isHorizontal ? node.position.x : node.position.y;
         
         minX = Math.min(minX, x - nodeWidth/2);
         maxX = Math.max(maxX, x + nodeWidth/2);
@@ -89,10 +150,11 @@ export class FlowDiagramVisualizer {
       const targetNode = diagram.getNode(edge.targetId);
       
       if (sourceNode && targetNode && sourceNode.position && targetNode.position) {
-        const x1 = sourceNode.position.x + offsetX;
-        const y1 = sourceNode.position.y + offsetY;
-        const x2 = targetNode.position.x + offsetX;
-        const y2 = targetNode.position.y + offsetY;
+        // Swap coordinates for horizontal layout
+        const x1 = (isHorizontal ? sourceNode.position.y : sourceNode.position.x) + offsetX;
+        const y1 = (isHorizontal ? sourceNode.position.x : sourceNode.position.y) + offsetY;
+        const x2 = (isHorizontal ? targetNode.position.y : targetNode.position.x) + offsetX;
+        const y2 = (isHorizontal ? targetNode.position.x : targetNode.position.y) + offsetY;
         
         // Calculate arrow direction
         const dx = x2 - x1;
@@ -119,7 +181,7 @@ export class FlowDiagramVisualizer {
           const labelX = (x1 + x2) / 2;
           const labelY = (y1 + y2) / 2;
           svg += `<text x="${labelX}" y="${labelY}" text-anchor="middle" 
-                  fill="${textColor}" font-size="12">${edge.label}</text>`;
+                  fill="${textColor}" font-size="12">${this.escapeXml(edge.label)}</text>`;
         }
       }
     });
@@ -128,10 +190,12 @@ export class FlowDiagramVisualizer {
     nodes.forEach(node => {
       if (!node.position) return;
       
-      const x = node.position.x + offsetX;
-      const y = node.position.y + offsetY;
-      const nodeWidth = node.style?.width || 100;
-      const nodeHeight = node.style?.height || 50;
+      // Swap coordinates for horizontal layout
+      const x = (isHorizontal ? node.position.y : node.position.x) + offsetX;
+      const y = (isHorizontal ? node.position.x : node.position.y) + offsetY;
+      const dims = nodeDimensions.get(node.id) || { width: 100, height: 50 };
+      const nodeWidth = dims.width;
+      const nodeHeight = dims.height;
       const rx = node.style?.borderRadius || 5;
       
       const fillColor = node.style?.backgroundColor || nodeColor;
@@ -146,14 +210,44 @@ export class FlowDiagramVisualizer {
               stroke="${strokeColor}" 
               stroke-width="${strokeWidth}"/>`;
       
-      // Node label
+      // Node label with text wrapping
       if (options.showLabels !== false) {
         const fontSize = node.style?.fontSize || 14;
         const fontFamily = node.style?.fontFamily || 'Arial, sans-serif';
-        svg += `<text x="${x}" y="${y + 5}" text-anchor="middle" 
-                fill="${node.style?.color || textColor}" 
-                font-size="${fontSize}" 
-                font-family="${fontFamily}">${node.label}</text>`;
+        const label = node.label || '';
+        
+        // Calculate max chars per line
+        const maxCharsPerLine = Math.floor((nodeWidth - 20) / (fontSize * 0.55));
+        
+        // Split label into lines
+        const words = label.split(' ');
+        const lines: string[] = [];
+        let currentLine = '';
+        
+        words.forEach(word => {
+          const testLine = currentLine ? `${currentLine} ${word}` : word;
+          if (testLine.length <= maxCharsPerLine || !currentLine) {
+            currentLine = testLine;
+          } else {
+            lines.push(currentLine);
+            currentLine = word;
+          }
+        });
+        if (currentLine) {
+          lines.push(currentLine);
+        }
+        
+        // Render text lines
+        const lineHeight = fontSize + 4;
+        const startY = y - ((lines.length - 1) * lineHeight) / 2;
+        
+        lines.forEach((line, index) => {
+          const textY = startY + index * lineHeight + fontSize / 3;
+          svg += `<text x="${x}" y="${textY}" text-anchor="middle" 
+                  fill="${node.style?.color || textColor}" 
+                  font-size="${fontSize}" 
+                  font-family="${fontFamily}">${this.escapeXml(line)}</text>`;
+        });
       }
     });
     
